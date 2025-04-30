@@ -1,0 +1,10 @@
+
+# ─── Azure / local development secrets ───────────────────────────
+regulaite/api/**/local.settings.json
+regulaite/api/**/local.settings.Development.json
+**/local.settings.json
+**/.env*
+.env
+# ─── IDE / tooling ───────────────────────────────────────────────
+.vscode/
+.idea/
