@@ -1,0 +1,85 @@
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 320px;
+}
+
+.drop {
+  border: 2px dashed var(--border);
+  border-radius: 2px;
+  padding: 2rem;
+  text-align: center;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.drop:hover:not(.demo-mode) {
+  border-color: var(--primary);
+  background: var(--background);
+}
+
+.drop.demo-mode {
+  background: var(--background);
+  cursor: default;
+  border-style: solid;
+  border-color: var(--border);
+}
+
+.drop p {
+  margin: 0;
+  color: var(--text);
+}
+
+.est {
+  font-size: 0.875rem;
+  color: #605e5c;
+  line-height: 1.4;
+  padding: 0.75rem;
+  background: var(--background);
+  border-radius: 2px;
+  border: 1px solid var(--border);
+}
+
+.est strong {
+  color: var(--primary);
+}
+
+.demo-note {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #0078d4;
+  background: rgba(0, 120, 212, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 2px;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border-radius: 2px;
+  border: none;
+  background: var(--primary);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+button:hover:not(:disabled) {
+  background: var(--primary-light);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button.demo-button {
+  background: #00b294;  /* Microsoft teal for demo mode */
+}
+
+button.demo-button:hover:not(:disabled) {
+  background: #008272;
+}

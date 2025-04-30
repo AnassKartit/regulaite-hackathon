@@ -1,0 +1,5 @@
+name: regulaite
+infra:
+  provider: bicep
+  path: infra
+  parameters: infra/main.parameters.json

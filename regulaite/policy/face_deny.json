@@ -1,0 +1,14 @@
+{
+  "mode": "All",
+  "displayName": "Deny Face API for public surveillance",
+  "policyRule": {
+    "if": {
+      "allOf": [
+        { "field": "type",  "equals": "Microsoft.CognitiveServices/accounts" },
+        { "field": "kind",  "equals": "Face" },
+        { "field": "tags.purpose", "equals": "public_surveillance" }
+      ]
+    },
+    "then": { "effect": "deny" }
+  }
+}
