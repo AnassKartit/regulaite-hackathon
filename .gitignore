@@ -5,6 +5,9 @@ regulaite/api/**/local.settings.Development.json
 **/local.settings.json
 **/.env*
 .env
+node_modules/
+dist/
+*.zip
 # ─── IDE / tooling ───────────────────────────────────────────────
 .vscode/
 .idea/
