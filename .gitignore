@@ -4,8 +4,13 @@ regulaite/api/**/local.settings.json
 regulaite/api/**/local.settings.Development.json
 **/local.settings.json
 **/.env*
-.env
+.venv/
+env/
 node_modules/
+dist/
+# build artefacts
+*.so
+*.dylib
 dist/
 *.zip
 # ─── IDE / tooling ───────────────────────────────────────────────
