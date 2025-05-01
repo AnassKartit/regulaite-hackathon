@@ -1,32 +1,22 @@
-// ============================================================================
-//  regulaite – hackathon infra (OpenAI + Search + Storage + Functions)
-//  API versions: 2024-10-01 for AI Service + deployments
-// ============================================================================
-
-// ───────── PARAMETERS (edit only if you really need to) ───────────
 param location  string = resourceGroup().location
-param baseName  string = 'regulaite'      // used as prefix everywhere
+param baseName  string = 'regulaite'
 @allowed([ true, false ])
-param deployDemoAssets bool = false      // flag to control demo assets deployment
+param deployDemoAssets bool = false
 
-// fixed suffix (keeps names stable but unique enough for the hack)
 var suffix       = 'hackathon'
 
-// model deployment names & versions (override with --parameters if you like)
 var chatDeploymentName  = 'gpt-4.1'
 var chatModelName       = 'gpt-4.1'
-var chatModelVersion    = '2025-04-14'   // Azure catalogue tag
+var chatModelVersion    = '2025-04-14'
 
 var embedDeploymentName = 'text-embedding-3-large'
 var embedModelName      = 'text-embedding-3-large'
 var embedModelVersion   = '1'
-
-// ───────── 1️⃣  AZURE AI SERVICE ACCOUNT (+2 deployments) ─────────
 resource oai 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name:     '${baseName}-oai-${suffix}'
   location: location
   kind:     'AIServices'
-  sku:      { name: 'S0' }                // pay-go tier
+  sku:      { name: 'S0' }
   identity: { type: 'SystemAssigned' }
   properties: {
     customSubDomainName: '${baseName}-oai-${suffix}'
@@ -35,14 +25,12 @@ resource oai 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
     encryption:   { keySource: 'Microsoft.CognitiveServices' }
   }
 }
-
-// GPT-4.1 deployment
 resource gpt4Deploy 'Microsoft.CognitiveServices/accounts/deployments@2025-04-01-preview' = {
   parent: oai
   name:   chatDeploymentName
   sku: {
     name: 'GlobalStandard'
-    capacity: 100    // adjust down if you hit quota
+    capacity: 100
   }
   properties: {
     model: {
@@ -52,8 +40,6 @@ resource gpt4Deploy 'Microsoft.CognitiveServices/accounts/deployments@2025-04-01
     }
   }
 }
-
-// text-embedding-3-large deployment
 resource embedDeploy 'Microsoft.CognitiveServices/accounts/deployments@2025-04-01-preview' = {
   parent: oai
   name:   embedDeploymentName
@@ -72,23 +58,19 @@ resource embedDeploy 'Microsoft.CognitiveServices/accounts/deployments@2025-04-0
     }
   }
 }
-
-// ───────── 2️⃣  AZURE AI SEARCH  (basic – avoids free-tier limit) ─
 resource search 'Microsoft.Search/searchServices@2023-11-01' = {
   name:     '${baseName}-search-${suffix}'
   location: location
-  sku:      { name: 'basic' }             // 3-unit quota per sub
+  sku:      { name: 'basic' }
   properties: {
     replicaCount: 1
     partitionCount: 1
   }
 }
-
-// ───────── 3️⃣  STORAGE + FUNCTIONS  ──────────────────────────────
 var shortSuffix = toLower(substring(uniqueString(resourceGroup().id), 0, 6))
 
 resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
-  name:     '${baseName}st${shortSuffix}'   // 16 chars ⇒ valid
+  name:     '${baseName}st${shortSuffix}'
   location: location
   sku:      { name: 'Standard_LRS' }
   kind:     'StorageV2'
@@ -97,7 +79,7 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
 resource plan 'Microsoft.Web/serverfarms@2023-01-01' = {
   name:     '${baseName}-plan-${suffix}'
   location: location
-  sku:      { name: 'Y1', tier: 'Dynamic' }   // Consumption
+  sku:      { name: 'Y1', tier: 'Dynamic' }
 }
 
 resource func 'Microsoft.Web/sites@2023-01-01' = {
@@ -107,9 +89,7 @@ resource func 'Microsoft.Web/sites@2023-01-01' = {
   properties: {
     serverFarmId: plan.id
     siteConfig: {
-      // NOTE: each element **must** be an object with `name` and `value`
       appSettings: [
-        // mandatory Functions setting
         {
           name: 'AzureWebJobsStorage'
           value: concat(
@@ -130,46 +110,33 @@ resource func 'Microsoft.Web/sites@2023-01-01' = {
   }
 }
 
-// ───────── 4️⃣  STATIC WEB APP  (React front-end) ──────────────────────────
-/*
-   • Free tier (good for hackathons).
-   • The "appLocation" points at the mono-repo root; the build will look for
-     a package.json and run the default Vite build.
-   • The build output ("appArtifactLocation") is dist, which matches
-     `npm run build` in src/web/package.json.
-   • Because you already have a standalone Functions app, we *don't* use the
-     SWA-integrated Functions feature – we just call your existing API URL.
-*/
 
 resource swa 'Microsoft.Web/staticSites@2023-10-01' = {
   name:  '${baseName}-web-${suffix}'
-  location: location   // ✱ static web apps live in "Central US" under the hood,
-                       //   but the control plane still accepts your RG location
+  location: location
   sku: {
-    name: 'Free'       // S0 if you need custom domains
+    name: 'Free'
     tier: 'Free'
   }
 
   properties: {
-    repositoryUrl: 'https://github.com/${baseName}/${baseName}'   // optional
-    branch:        'main'                                         // optional
+    repositoryUrl: 'https://github.com/${baseName}/${baseName}'
+    branch:        'main'
     buildProperties: {
-      appLocation:              'src/web'   // path from repo root
-      apiLocation:              ''          // none – we have a separate Functions app
-      appArtifactLocation:      'dist'      // vite build output
+      appLocation:              'src/web'
+      apiLocation:              ''
+      appArtifactLocation:      'dist'
       skipGithubActionWorkflowGeneration: true
     }
     allowConfigFileUpdates: true
   }
 }
 
-// Allow the static site to hit your Functions endpoint (CORS)
 resource funcCors 'Microsoft.Web/sites/config@2023-01-01' = {
   name: '${func.name}/web'
   properties: {
     cors: {
       allowedOrigins: [
-        // static web app primary hostname – e.g. https://icy-wave-12345.azurestaticapps.net
         swa.properties.defaultHostname
       ]
     }
@@ -179,18 +146,7 @@ resource funcCors 'Microsoft.Web/sites/config@2023-01-01' = {
   ]
 }
 
-// ───────── 5️⃣  DEMO ASSETS (optional) ─────────────────────────────
-/* Temporarily commented out due to editor issues
-module demoAssets './demoAssets.bicep' = if (deployDemoAssets) {
-  name: 'demoAssets'
-  params: {
-    location: location
-    demoTag: 'demo'
-  }
-}
-*/
 
-// ───────── OUTPUTS (no secrets!) ──────────────────────────────────
 output openaiEndpoint   string = 'https://${oai.name}.openai.azure.com/'
 output chatDeployment   string = chatDeploymentName
 output embedDeployment  string = embedDeploymentName
@@ -206,5 +162,3 @@ output STORAGE_ACC           string = storage.name
 output STORAGE_KEY           string = listKeys(storage.id, '2023-05-01').keys[0].value
 output staticWebUrl          string = 'https://${swa.properties.defaultHostname}'
 output demoMode             string = deployDemoAssets ? '✅ Demo assets will be deployed' : '❌ Demo assets disabled'
-// Temporarily commented out due to editor issues
-// output demoAssetNames     array  = deployDemoAssets ? demoAssets.outputs.assetNames : []
