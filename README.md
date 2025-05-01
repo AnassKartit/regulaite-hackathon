@@ -1,9 +1,11 @@
-# RegulAIte – instant EU AI‑Act compliance reports for any codebase
+# RegulAIte –  Compliance Compass
+
+![RegulAIte Logo](./RegulAIteLogo.png)
 
 > **Fast pitch for judges:** Drag‑and‑drop a regulation PDF, click **Scan**, and get a color‑coded risk heat‑map in 60 seconds.  Powered by GPT‑4.1 (RAG‑backed) + Azure AI Search.
 
 ---
-
+ 
 ## 🔧 Local quick‑start (5 min)
 
 ```bash
@@ -41,7 +43,7 @@ $ cat > local.settings.json << EOL
     "AZURE_OPENAI_ENDPOINT": "${AZURE_OPENAI_ENDPOINT}",
     "AZURE_OPENAI_KEY": "${AZURE_OPENAI_KEY}",
     "AZURE_SEARCH_ENDPOINT": "${AZURE_SEARCH_ENDPOINT}",
-    "AZURE_SEARCH_INDEX": "eu_idx",
+    "AZURE_SEARCH_INDEX": "${AZURE_SEARCH_INDEX}"
     "AZURE_SEARCH_KEY": "${AZURE_SEARCH_KEY}"
   }
 }
