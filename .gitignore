@@ -1,18 +1,51 @@
-
-# ─── Azure / local development secrets ───────────────────────────
-regulaite/api/**/local.settings.json
-regulaite/api/**/local.settings.Development.json
-**/local.settings.json
-**/.env*
-.venv/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+.venv
 env/
+venv/
+ENV/
+dist/
+build/
+*.egg-info/
+
+# Node
 node_modules/
 dist/
-# build artefacts
-*.so
-*.dylib
-dist/
-*.zip
-# ─── IDE / tooling ───────────────────────────────────────────────
+.npm
+.env
+.env.local
+.env.*.local
+
+# Azure Functions
+local.settings.json
+*.settings.json
+
+# Generated PDFs
+api/compliance_*.pdf
+
+# IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Azure
+.azure/
+azureauth.json
+
+# Local development
+*.log
