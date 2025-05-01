@@ -1,0 +1,9 @@
+{
+  "routes": [
+    {
+      "route": "/api/*",
+      "allowedRoles": ["anonymous"],
+      "rewrite": "https://regulaite-api-hackathon.azurewebsites.net/api/:path"
+    }
+  ]
+}

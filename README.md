@@ -86,13 +86,33 @@ The Bicep infra (see `infra/`) provisions:
 * **OpenAI** (GPT‑4.1 + text‑embedding‑3‑large)
 * **AI Search** (vector + semantic)
 * **Function App** (Python 3.11, Consumption plan)
-* **Static Web App** (built locally by `azd`)
+* **Static Web App** (Free tier, hosting the React/Vite front-end)
 
 All connection strings & keys are surfaced as env vars – run:
 ```bash
 set -a; eval "$(azd env get-values)"; set +a
 ```
 …and your local Functions + CLI will Just Work™.
+
+### Deploying the Static Web App
+
+After running `azd up` to provision the infrastructure, you can deploy the React app to the Static Web App using:
+
+```bash
+# Make the script executable if needed
+chmod +x infra/deploy-web.sh
+
+# Deploy with default resource group and base name
+./infra/deploy-web.sh
+
+# Or specify custom resource group and base name
+./infra/deploy-web.sh your-resource-group your-base-name
+```
+
+This script will:
+1. Build the React app using npm
+2. Upload the build output to the Azure Static Web App
+3. Display the URL where your app is available
 
 > **Reset / teardown**: `azd down`
 

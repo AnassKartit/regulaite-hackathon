@@ -130,7 +130,57 @@ resource func 'Microsoft.Web/sites@2023-01-01' = {
   }
 }
 
-// ───────── 4️⃣  DEMO ASSETS (optional) ─────────────────────────────
+// ───────── 4️⃣  STATIC WEB APP  (React front-end) ──────────────────────────
+/*
+   • Free tier (good for hackathons).
+   • The "appLocation" points at the mono-repo root; the build will look for
+     a package.json and run the default Vite build.
+   • The build output ("appArtifactLocation") is dist, which matches
+     `npm run build` in src/web/package.json.
+   • Because you already have a standalone Functions app, we *don't* use the
+     SWA-integrated Functions feature – we just call your existing API URL.
+*/
+
+resource swa 'Microsoft.Web/staticSites@2023-10-01' = {
+  name:  '${baseName}-web-${suffix}'
+  location: location   // ✱ static web apps live in "Central US" under the hood,
+                       //   but the control plane still accepts your RG location
+  sku: {
+    name: 'Free'       // S0 if you need custom domains
+    tier: 'Free'
+  }
+
+  properties: {
+    repositoryUrl: 'https://github.com/${baseName}/${baseName}'   // optional
+    branch:        'main'                                         // optional
+    buildProperties: {
+      appLocation:              'src/web'   // path from repo root
+      apiLocation:              ''          // none – we have a separate Functions app
+      appArtifactLocation:      'dist'      // vite build output
+      skipGithubActionWorkflowGeneration: true
+    }
+    allowConfigFileUpdates: true
+  }
+}
+
+// Allow the static site to hit your Functions endpoint (CORS)
+resource funcCors 'Microsoft.Web/sites/config@2023-01-01' = {
+  name: '${func.name}/web'
+  properties: {
+    cors: {
+      allowedOrigins: [
+        // static web app primary hostname – e.g. https://icy-wave-12345.azurestaticapps.net
+        swa.properties.defaultHostname
+      ]
+    }
+  }
+  dependsOn: [
+    swa
+  ]
+}
+
+// ───────── 5️⃣  DEMO ASSETS (optional) ─────────────────────────────
+/* Temporarily commented out due to editor issues
 module demoAssets './demoAssets.bicep' = if (deployDemoAssets) {
   name: 'demoAssets'
   params: {
@@ -138,6 +188,7 @@ module demoAssets './demoAssets.bicep' = if (deployDemoAssets) {
     demoTag: 'demo'
   }
 }
+*/
 
 // ───────── OUTPUTS (no secrets!) ──────────────────────────────────
 output openaiEndpoint   string = 'https://${oai.name}.openai.azure.com/'
@@ -153,5 +204,7 @@ output AZURE_SEARCH_KEY      string = listAdminKeys(search.id, '2023-11-01').pri
 output AZURE_SEARCH_INDEX    string = 'regulaite-laws'
 output STORAGE_ACC           string = storage.name
 output STORAGE_KEY           string = listKeys(storage.id, '2023-05-01').keys[0].value
+output staticWebUrl          string = 'https://${swa.properties.defaultHostname}'
 output demoMode             string = deployDemoAssets ? '✅ Demo assets will be deployed' : '❌ Demo assets disabled'
-output demoAssetNames     array  = deployDemoAssets ? demoAssets.outputs.assetNames : []
+// Temporarily commented out due to editor issues
+// output demoAssetNames     array  = deployDemoAssets ? demoAssets.outputs.assetNames : []
