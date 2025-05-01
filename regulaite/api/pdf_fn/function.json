@@ -7,10 +7,9 @@
       "direction": "in",
       "name": "req",
       "methods": [
-        "post",
-        "options"
+        "get"
       ],
-      "route": "scan"
+      "route": "pdf/{name}"
     },
     {
       "type": "http",

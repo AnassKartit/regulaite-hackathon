@@ -2,11 +2,7 @@ import logging
 import json
 import azure.functions as func
 
-app = func.FunctionApp()
-
-@app.function_name(name="upload-law")
-@app.route(route="upload-law", auth_level=func.AuthLevel.ANONYMOUS)
-def upload_law(req: func.HttpRequest) -> func.HttpResponse:
+def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Processing law upload request')
     
     # Handle CORS preflight
