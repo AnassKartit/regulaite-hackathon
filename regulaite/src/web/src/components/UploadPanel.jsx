@@ -47,8 +47,8 @@ export default function UploadPanel() {
         </div>
       )}
 
-      <button 
-        disabled={!file} 
+      <button
+        disabled={!file}
         onClick={upload}
       >
         {file ? '➕ Process Document' : 'Upload a document to begin'}
